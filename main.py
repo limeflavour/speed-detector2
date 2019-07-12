@@ -19,6 +19,7 @@ if __name__ == '__main__':
     FPS = 30
     '''
         Distance to line in road: ~0.025 miles
+        Distance to line in road: ~0.025 miles
     '''
     ROAD_DIST_MILES = 0.025
 
