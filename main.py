@@ -12,10 +12,7 @@ from kalman_filter import KalmanFilter
 from tracker import Tracker
 
 if __name__ == '__main__':
-    # The one I first used for testing; after staring at it so much, I've grown attached to this road :3
-    #the_og_base_url = 'http://wzmedia.dot.ca.gov:1935/D3/89_rampart.stream/'
 
-    #BASE_URL = 'http://wzmedia.dot.ca.gov:1935/D3/80_whitmore_grade.stream/'
     FPS = 30
     '''
         Distance to line in road: ~0.025 miles
@@ -23,7 +20,7 @@ if __name__ == '__main__':
     ROAD_DIST_MILES = 0.025
 
     '''
-        Speed limit of urban freeways in California (50-65 MPH)
+        Speed limit (MPH)
     '''
     HIGHWAY_SPEED_LIMIT = 65
 
@@ -32,7 +29,7 @@ if __name__ == '__main__':
     # Initial background subtractor and text font
     #fgbg = cv2.createBackgroundSubtractorMOG2(history = history, detectShadows = True)
 
-    algorithm = bgs.DPZivkovicAGMM()
+    algorithm = bgs.TwoPoints()
     font = cv2.FONT_HERSHEY_PLAIN
 
     centers = []
@@ -72,7 +69,8 @@ if __name__ == '__main__':
         # Convert frame to grayscale and perform background subtraction
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         #fgmask = fgbg.apply(gray)
-        fgmask = algorithm.apply(gray)
+
+        fgmask = algorithm.apply(frame)
 
 
         # Perform some Morphological operations to remove noise
@@ -105,7 +103,7 @@ if __name__ == '__main__':
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
                     #测试
-                    cv2.imshow("blob_min_width_near",frame)
+                    #cv2.imshow("blob_min_width_near",frame)
                     #cv2.waitKey(0)
             else:
                 if w >= blob_min_width_far and h >= blob_min_height_far:
@@ -116,7 +114,7 @@ if __name__ == '__main__':
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     #测试
-                    cv2.imshow("blob_min_width_far", frame)
+                    #cv2.imshow("blob_min_width_far", frame)
                     #cv2.waitKey(0)
         if centers:
             print("centers is not null")
