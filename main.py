@@ -50,7 +50,7 @@ if __name__ == '__main__':
     tracker = Tracker(80, 3, 2, 1)
 
     # Capture livestream
-    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t17.mp4')
+    cap = cv2.VideoCapture('/home/zxl/文档/TestVideo/t17.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
