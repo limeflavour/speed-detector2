@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # Initial background subtractor and text font
     #fgbg = cv2.createBackgroundSubtractorMOG2(history = history, detectShadows = True)
 
-    algorithm = bgs.TwoPoints()
+    algorithm = bgs.AdaptiveSelectiveBackgroundLearning()
     font = cv2.FONT_HERSHEY_PLAIN
 
     centers = []
