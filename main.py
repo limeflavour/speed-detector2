@@ -13,11 +13,11 @@ from tracker import Tracker
 
 if __name__ == '__main__':
 
-    FPS = 30
+    #FPS = 30
     '''
         Distance to line in road: ~0.025 miles
     '''
-    ROAD_DIST_MILES = 0.031
+    ROAD_DIST_MILES = 0.025
 
     '''
         Speed limit (MPH)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     tracker = Tracker(80, 3, 2, 1)
 
     # Capture livestream
-    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t24.mp4')
+    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t22.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_FPS = round(cap.get(cv2.CAP_PROP_FPS))
