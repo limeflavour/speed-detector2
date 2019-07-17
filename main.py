@@ -17,7 +17,7 @@ if __name__ == '__main__':
     '''
         Distance to line in road: ~0.025 miles
     '''
-    ROAD_DIST_MILES = 0.025
+    ROAD_DIST_MILES = 0.031
 
     '''
         Speed limit (MPH)
@@ -29,16 +29,14 @@ if __name__ == '__main__':
     # Initial background subtractor and text font
     #fgbg = cv2.createBackgroundSubtractorMOG2(history = history, detectShadows = True)
 
-    algorithm = bgs.AdaptiveSelectiveBackgroundLearning()
+    algorithm = bgs.StaticFrameDifference()
     font = cv2.FONT_HERSHEY_PLAIN
-
-    tracker12312 = cv2.TrackerBoosting_create()
 
     centers = []
 
     # y-cooridinate for speed detection line
     #速度检测线的Y坐标
-    Y_THRESH = 500
+    Y_THRESH = 400
 
     blob_min_width_far = 6
     blob_min_height_far = 6
@@ -52,16 +50,24 @@ if __name__ == '__main__':
     tracker = Tracker(80, 3, 2, 1)
 
     # Capture livestream
-    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t17.mp4')
+    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t24.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_FPS = round(cap.get(cv2.CAP_PROP_FPS))
+    pauseTime = round(1000 / frame_FPS)
+
+    print("FPS: ",frame_FPS)
+    print("pauseTime: ",pauseTime)
 
     while True:
         centers = []
         frame_start_time = datetime.utcnow()
+
+
         ret, frame = cap.read()
 
-
+        if ret == False:
+            break
 
         orig_frame = copy.copy(frame)
 
@@ -70,6 +76,14 @@ if __name__ == '__main__':
 
         # Convert frame to grayscale and perform background subtraction
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        gray = cv2.GaussianBlur(gray,(5,5,),0)
+
+        #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+        #frame_H,frame_S,frame_V = cv2.split(hsv)
+
+        #frame_B,frame_G,frame_R = cv2.split(frame)
+
         #fgmask = fgbg.apply(gray)
 
         fgmask = algorithm.apply(frame)
@@ -85,17 +99,22 @@ if __name__ == '__main__':
 
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
         erode = cv2.erode(fgmask,kernel)
+        #erode = cv2.erode(erode, kernel)
         dilation = cv2.dilate(erode, kernel)
+        dilation = cv2.dilate(dilation, kernel)
+        dilation = cv2.dilate(dilation, kernel)
         dilation = cv2.dilate(dilation, kernel)
 
         _, contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+
 
         # Find centers of all detected objects
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
 
             #测试
-            print("x:", x, "y:", y, "w:" ,w , "h:", h)
+            #print("矩形： ","x:", x, "y:", y, "w:" ,w , "h:", h)
 
             if y > Y_THRESH:
                 if w >= blob_min_width_near and h >= blob_min_height_near:
@@ -118,9 +137,9 @@ if __name__ == '__main__':
                     #测试
                     #cv2.imshow("blob_min_width_far", frame)
                     #cv2.waitKey(0)
-        if centers:
-            print("centers is not null")
-            print(centers)
+        #if centers:
+        #    print("centers is not null")
+        #   print(centers)
 
         if centers:
             tracker.update(centers)
@@ -135,12 +154,12 @@ if __name__ == '__main__':
                         y2 = vehicle.trace[j + 1][1][0]
 
                         #画出上一矩形与当前帧矩形中心的连线
-                        cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 255), 2)
+                        cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 0), 2)
 
 
                         #测试
-                        print("x1:",int(x1),"y1:",int(y1),"x2:",int(x2),"y2:",int(y2))
-                        print("-----------------------------------------")
+                        #print("x1:",int(x1),"y1:",int(y1),"x2:",int(x2),"y2:",int(y2))
+                        #print("-----------------------------------------")
                     try:
                         '''
                             TODO: account for load lag
@@ -158,13 +177,17 @@ if __name__ == '__main__':
                             vehicle.passed = True
 
                             load_lag = (datetime.utcnow() - frame_start_time).total_seconds()
+                            print("-------------------------------------------------------")
+                            print("frame_start_time:", frame_start_time,"datetime.utcnow():",datetime.utcnow(),"load_lag",load_lag)
 
                             time_dur = (datetime.utcnow() - vehicle.start_time).total_seconds() - load_lag
+                            print("datetime.utcnow():",datetime.utcnow(),"vehicle.start_time:",vehicle.start_time,"load_lag:",load_lag)
+                            print("time_dur",time_dur)
                             time_dur /= 60
                             time_dur /= 60
 
                             vehicle.mph = ROAD_DIST_MILES / time_dur
-                            vehicle_kmh = vehicle.mph * 1.61
+                            vehicle.kmh = vehicle.mph * 1.61
 
                             # If calculated speed exceeds speed limit, save an image of speeding car
                             if vehicle.mph > HIGHWAY_SPEED_LIMIT:
@@ -172,19 +195,15 @@ if __name__ == '__main__':
                                 cv2.circle(orig_frame, (int(trace_x), int(trace_y)), 20, (0, 0, 255), 2)
                                 #cv2.putText(orig_frame, 'MPH: %s' % int(vehicle.mph), (int(trace_x), int(trace_y)), font, 1,
                                 #           (0, 0, 255), 1, cv2.LINE_AA)
-                                cv2.putText(orig_frame, 'KMH: %s' % int(vehicle_kmh), (int(trace_x), int(trace_y)),
+                                cv2.putText(orig_frame, 'KMH: %s' % int(vehicle.kmh), (int(trace_x), int(trace_y)),
                                             font, 1, (0, 0, 255), 1, cv2.LINE_AA)
                                 cv2.imwrite('speeding_%s.png' % vehicle.track_id, orig_frame)
                                 print('FILE SAVED!')
 
                         if vehicle.passed:
                             # Display speed if available
-                            cv2.putText(frame, 'MPH: %s' % int(vehicle.mph), (int(trace_x), int(trace_y)), font, 1,
+                            cv2.putText(frame, 'KMH: %s' % int(vehicle.kmh), (int(trace_x), int(trace_y)), font, 1,
                                         (0, 255, 255), 1, cv2.LINE_AA)
-
-                            #vehicle_kmh = vehicle.mph * 1.61
-                            #cv2.putText(orig_frame, 'KMH: %s' % int(vehicle_kmh), (int(trace_x), int(trace_y)),
-                            #           font, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
                         else:
                             # Otherwise, just show tracking id
@@ -199,7 +218,7 @@ if __name__ == '__main__':
         cv2.imshow('opening/dilation', dilation)
         cv2.imshow('background subtraction', fgmask)
 
-        keyboard = cv2.waitKey(5)
+        keyboard = cv2.waitKey(pauseTime)
         # Quit when escape key pressed
         if keyboard == 27:
             break
@@ -207,7 +226,7 @@ if __name__ == '__main__':
             cv2.waitKey(0)
 
         # Sleep to keep video speed consistent
-        time.sleep(1.0 / FPS)
+        #time.sleep(1.0 / FPS)
 
     # Clean up
     cap.release()
