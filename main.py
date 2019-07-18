@@ -38,11 +38,11 @@ if __name__ == '__main__':
     #速度检测线的Y坐标
     Y_THRESH = 400
 
-    blob_min_width_far = 6
-    blob_min_height_far = 6
+    blob_min_width_far = 25
+    blob_min_height_far = 25
 
-    blob_min_width_near = 18
-    blob_min_height_near = 18
+    blob_min_width_near = 30
+    blob_min_height_near = 30
 
     frame_start_time = None
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     tracker = Tracker(80, 3, 2, 1)
 
     # Capture livestream
-    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t22.mp4')
+    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t24.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_FPS = round(cap.get(cv2.CAP_PROP_FPS))
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         orig_frame = copy.copy(frame)
 
         #  Draw line used for speed detection
-        cv2.line(frame, (0, Y_THRESH), (frame_width, Y_THRESH), (255, 0, 0), 2)
+        cv2.line(frame, (0, Y_THRESH), (frame_width, Y_THRESH), (0, 139, 139), 2)
 
         # Convert frame to grayscale and perform background subtraction
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -100,10 +100,10 @@ if __name__ == '__main__':
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
         erode = cv2.erode(fgmask,kernel)
         #erode = cv2.erode(erode, kernel)
-        dilation = cv2.dilate(erode, kernel)
-        dilation = cv2.dilate(dilation, kernel)
-        dilation = cv2.dilate(dilation, kernel)
-        dilation = cv2.dilate(dilation, kernel)
+        dilation = cv2.dilate(erode, kernel,None,None,3)
+        #dilation = cv2.dilate(dilation, kernel)
+        #dilation = cv2.dilate(dilation, kernel)
+        #dilation = cv2.dilate(dilation, kernel)
 
         _, contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                         y2 = vehicle.trace[j + 1][1][0]
 
                         #画出上一矩形与当前帧矩形中心的连线
-                        cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 0), 2)
+                        cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)
 
 
                         #测试
