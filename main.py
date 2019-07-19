@@ -22,7 +22,8 @@ if __name__ == '__main__':
     '''
         Speed limit (MPH)
     '''
-    HIGHWAY_SPEED_LIMIT = 65
+    HIGHWAY_SPEED_LIMIT_MPH = 65
+    HIGHWAY_SPEED_LIMIT_KMH = 50
 
     history = 100
 
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     tracker = Tracker(80, 3, 2, 1)
 
     # Capture livestream
-    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t24.mp4')
+    cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t23.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_FPS = round(cap.get(cv2.CAP_PROP_FPS))
@@ -190,7 +191,7 @@ if __name__ == '__main__':
                             vehicle.kmh = vehicle.mph * 1.61
 
                             # If calculated speed exceeds speed limit, save an image of speeding car
-                            if vehicle.mph > HIGHWAY_SPEED_LIMIT:
+                            if vehicle.kmh > HIGHWAY_SPEED_LIMIT_KMH:
                                 print('UH OH, SPEEDING!')
                                 cv2.circle(orig_frame, (int(trace_x), int(trace_y)), 20, (0, 0, 255), 2)
                                 #cv2.putText(orig_frame, 'MPH: %s' % int(vehicle.mph), (int(trace_x), int(trace_y)), font, 1,
@@ -233,5 +234,5 @@ if __name__ == '__main__':
     cv2.destroyAllWindows()
 
     # remove all speeding_*.png images created in runtime
-    for file in glob.glob('speeding_*.png'):
-        os.remove(file)
+    #for file in glob.glob('speeding_*.png'):
+    #    os.remove(file)
