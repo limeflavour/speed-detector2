@@ -14,44 +14,50 @@ from tracker import Tracker
 if __name__ == '__main__':
 
     #FPS = 30
-    '''
-        Distance to line in road: ~0.025 miles
-    '''
+
+    #视频中下部到检测线的距离
     ROAD_DIST_MILES = 0.025
 
-    '''
-        Speed limit (MPH)
-    '''
+
+    #速度限制
     HIGHWAY_SPEED_LIMIT_MPH = 65
     HIGHWAY_SPEED_LIMIT_KMH = 50
 
     history = 100
 
-
+    #背景建模方法
     algorithm = bgs.StaticFrameDifference()
+
+    #字体
     font = cv2.FONT_HERSHEY_PLAIN
+
 
     centers = []
 
     #速度检测线的Y坐标
     Y_THRESH = 400
 
+    #远处检测框的大小
     blob_min_width_far = 25
     blob_min_height_far = 25
 
+    #近处检测框的大小
     blob_min_width_near = 30
     blob_min_height_near = 30
 
     frame_start_time = None
 
-
+    #初始化一个Tracker
     tracker = Tracker(80, 3, 2, 1)
 
 
     cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t23.mp4')
 
+    #视频帧宽
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    #视频FPS
     frame_FPS = round(cap.get(cv2.CAP_PROP_FPS))
+    #视频每帧之间的等待时间
     pauseTime = round(1000 / frame_FPS)
 
     print("FPS: ",frame_FPS)
@@ -70,6 +76,7 @@ if __name__ == '__main__':
         orig_frame = copy.copy(frame)
 
 
+        #画出检测线
         cv2.line(frame, (0, Y_THRESH), (frame_width, Y_THRESH), (0, 139, 139), 2)
 
 
@@ -84,6 +91,7 @@ if __name__ == '__main__':
 
         #fgmask = fgbg.apply(gray)
 
+        #获取前景掩模
         fgmask = algorithm.apply(frame)
 
 
@@ -95,6 +103,7 @@ if __name__ == '__main__':
 
         #fgmask = cv2.adaptiveThreshold(fgmask,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,5,0)
 
+        #形态学处理
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
         erode = cv2.erode(fgmask,kernel)
         #erode = cv2.erode(erode, kernel)
@@ -103,11 +112,12 @@ if __name__ == '__main__':
         #dilation = cv2.dilate(dilation, kernel)
         #dilation = cv2.dilate(dilation, kernel)
 
+        #寻找轮廓
         _, contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 
 
-
+        #将检测到的汽车中心加入centers
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
 
@@ -135,9 +145,6 @@ if __name__ == '__main__':
                     #测试
                     #cv2.imshow("blob_min_width_far", frame)
                     #cv2.waitKey(0)
-        #if centers:
-        #    print("centers is not null")
-        #   print(centers)
 
         if centers:
             tracker.update(centers)
@@ -145,7 +152,7 @@ if __name__ == '__main__':
             for vehicle in tracker.tracks:
                 if len(vehicle.trace) > 1:
                     for j in range(len(vehicle.trace) - 1):
-                        # Draw trace line
+                        # 画出跟踪线
                         x1 = vehicle.trace[j][0][0]
                         y1 = vehicle.trace[j][1][0]
                         x2 = vehicle.trace[j + 1][0][0]
@@ -174,6 +181,7 @@ if __name__ == '__main__':
                                         cv2.LINE_AA)
                             vehicle.passed = True
 
+                            #load_lag为程序运行到这里的开销
                             load_lag = (datetime.utcnow() - frame_start_time).total_seconds()
                             print("-------------------------------------------------------")
                             print("frame_start_time:", frame_start_time,"datetime.utcnow():",datetime.utcnow(),"load_lag",load_lag)
@@ -189,14 +197,14 @@ if __name__ == '__main__':
 
 
                             if vehicle.kmh > HIGHWAY_SPEED_LIMIT_KMH:
-                                print('UH OH, SPEEDING!')
+                                print('超速了!')
                                 cv2.circle(orig_frame, (int(trace_x), int(trace_y)), 20, (0, 0, 255), 2)
                                 #cv2.putText(orig_frame, 'MPH: %s' % int(vehicle.mph), (int(trace_x), int(trace_y)), font, 1,
                                 #           (0, 0, 255), 1, cv2.LINE_AA)
                                 cv2.putText(orig_frame, 'KMH: %s' % int(vehicle.kmh), (int(trace_x), int(trace_y)),
                                             font, 1, (0, 0, 255), 1, cv2.LINE_AA)
                                 cv2.imwrite('speeding_%s.png' % vehicle.track_id, orig_frame)
-                                print('FILE SAVED!')
+                                print('超速照片已保存!')
 
                         if vehicle.passed:
 
