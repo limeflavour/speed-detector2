@@ -27,15 +27,12 @@ if __name__ == '__main__':
 
     history = 100
 
-    # Initial background subtractor and text font
-    #fgbg = cv2.createBackgroundSubtractorMOG2(history = history, detectShadows = True)
 
     algorithm = bgs.StaticFrameDifference()
     font = cv2.FONT_HERSHEY_PLAIN
 
     centers = []
 
-    # y-cooridinate for speed detection line
     #速度检测线的Y坐标
     Y_THRESH = 400
 
@@ -47,10 +44,10 @@ if __name__ == '__main__':
 
     frame_start_time = None
 
-    # Create object tracker
+
     tracker = Tracker(80, 3, 2, 1)
 
-    # Capture livestream
+
     cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t23.mp4')
 
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -72,10 +69,10 @@ if __name__ == '__main__':
 
         orig_frame = copy.copy(frame)
 
-        #  Draw line used for speed detection
+
         cv2.line(frame, (0, Y_THRESH), (frame_width, Y_THRESH), (0, 139, 139), 2)
 
-        # Convert frame to grayscale and perform background subtraction
+
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         gray = cv2.GaussianBlur(gray,(5,5,),0)
@@ -90,7 +87,7 @@ if __name__ == '__main__':
         fgmask = algorithm.apply(frame)
 
 
-        # Perform some Morphological operations to remove noise
+
         # kernel = np.ones((4,4),np.uint8)
         # kernel_dilate = np.ones((5,5),np.uint8)
         # opening = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
@@ -110,7 +107,7 @@ if __name__ == '__main__':
 
 
 
-        # Find centers of all detected objects
+
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
 
@@ -171,7 +168,7 @@ if __name__ == '__main__':
                         trace_x = vehicle.trace[trace_i][0][0]
                         trace_y = vehicle.trace[trace_i][1][0]
 
-                        # Check if tracked object has reached the speed detection line
+
                         if trace_y <= Y_THRESH + 5 and trace_y >= Y_THRESH - 5 and not vehicle.passed:
                             cv2.putText(frame, 'I PASSED!', (int(trace_x), int(trace_y)), font, 1, (0, 255, 255), 1,
                                         cv2.LINE_AA)
@@ -190,7 +187,7 @@ if __name__ == '__main__':
                             vehicle.mph = ROAD_DIST_MILES / time_dur
                             vehicle.kmh = vehicle.mph * 1.61
 
-                            # If calculated speed exceeds speed limit, save an image of speeding car
+
                             if vehicle.kmh > HIGHWAY_SPEED_LIMIT_KMH:
                                 print('UH OH, SPEEDING!')
                                 cv2.circle(orig_frame, (int(trace_x), int(trace_y)), 20, (0, 0, 255), 2)
@@ -202,37 +199,37 @@ if __name__ == '__main__':
                                 print('FILE SAVED!')
 
                         if vehicle.passed:
-                            # Display speed if available
+
                             cv2.putText(frame, 'KMH: %s' % int(vehicle.kmh), (int(trace_x), int(trace_y)), font, 1,
                                         (0, 255, 255), 1, cv2.LINE_AA)
 
                         else:
-                            # Otherwise, just show tracking id
+
                             cv2.putText(frame, 'ID: ' + str(vehicle.track_id), (int(trace_x), int(trace_y)), font, 1,
                                         (255, 255, 255), 1, cv2.LINE_AA)
                     except:
                         pass
 
-        # Display all images
+
         cv2.imshow('original', frame)
         cv2.imshow('opening/erode', erode)
         cv2.imshow('opening/dilation', dilation)
         cv2.imshow('background subtraction', fgmask)
 
         keyboard = cv2.waitKey(pauseTime)
-        # Quit when escape key pressed
+
         if keyboard == 27:
             break
         if keyboard == 32:
             cv2.waitKey(0)
 
-        # Sleep to keep video speed consistent
+
         #time.sleep(1.0 / FPS)
 
-    # Clean up
+
     cap.release()
     cv2.destroyAllWindows()
 
-    # remove all speeding_*.png images created in runtime
-    #for file in glob.glob('speeding_*.png'):
-    #    os.remove(file)
+
+    for file in glob.glob('speeding_*.png'):
+        os.remove(file)

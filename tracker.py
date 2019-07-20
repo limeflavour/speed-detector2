@@ -1,11 +1,3 @@
-'''
-    File name         : tracker.py
-    File Description  : Tracker Using Kalman Filter & Hungarian Algorithm
-    Author            : Srini Ananthakrishnan
-    Date created      : 07/14/2017
-    Date last modified: 07/16/2017
-    Python Version    : 2.7
-'''
 
 # Import python libraries
 import numpy as np
