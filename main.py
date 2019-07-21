@@ -166,9 +166,6 @@ if __name__ == '__main__':
                         #print("x1:",int(x1),"y1:",int(y1),"x2:",int(x2),"y2:",int(y2))
                         #print("-----------------------------------------")
                     try:
-                        '''
-                            TODO: account for load lag
-                        '''
 
                         trace_i = len(vehicle.trace) - 1
 
@@ -224,20 +221,23 @@ if __name__ == '__main__':
         cv2.imshow('opening/dilation', dilation)
         cv2.imshow('background subtraction', fgmask)
 
+        #等待(1000/FPS)ms
         keyboard = cv2.waitKey(pauseTime)
 
+        #按下'q'键推出
         if keyboard == 27:
             break
+        #按下' '键暂停
         if keyboard == 32:
             cv2.waitKey(0)
 
 
         #time.sleep(1.0 / FPS)
 
-
+    #释放资源
     cap.release()
     cv2.destroyAllWindows()
 
-
+    #删除运行时产生的截图
     for file in glob.glob('speeding_*.png'):
         os.remove(file)
