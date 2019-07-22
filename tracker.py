@@ -83,6 +83,7 @@ class Tracker(object):
         # predicted vs detected centroids
         N = len(self.tracks)
         M = len(detections)
+        print('N:',N,'M:',M)
         cost = np.zeros(shape=(N, M))   # Cost matrix
         for i in range(len(self.tracks)):
             for j in range(len(detections)):
@@ -93,7 +94,6 @@ class Tracker(object):
                     cost[i][j] = distance
                 except:
                     pass
-
         # Let's average the squared ERROR
         cost = (0.5) * cost
         # Using Hungarian Algorithm assign the correct detected measurements
@@ -102,6 +102,8 @@ class Tracker(object):
         # for _ in range(N):
         #     assignment.append(-1)
         row_ind, col_ind = linear_sum_assignment(cost)
+
+
         for i in range(len(row_ind)):
             assignment[row_ind[i]] = col_ind[i]
 

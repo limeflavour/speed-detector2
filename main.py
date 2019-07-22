@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     #速度限制
     HIGHWAY_SPEED_LIMIT_MPH = 65
-    HIGHWAY_SPEED_LIMIT_KMH = 50
+    HIGHWAY_SPEED_LIMIT_KMH = 100
 
     history = 100
 
@@ -147,7 +147,9 @@ if __name__ == '__main__':
                     #cv2.waitKey(0)
 
         if centers:
+            print('centers.length',centers.__len__())
             tracker.update(centers)
+
 
             for vehicle in tracker.tracks:
                 if len(vehicle.trace) > 1:
