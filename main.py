@@ -5,6 +5,7 @@ import copy
 import os
 import glob
 import bgs
+import sys
 import multiprocessing as mpr
 from datetime import datetime
 
@@ -53,6 +54,9 @@ if __name__ == '__main__':
 
     cap = cv2.VideoCapture('/home/zxl/文档/speed-detector/TestVideo/t23.mp4')
 
+    if (cap.isOpened() == False):
+        print('视频打开失败！')
+        sys.exit()
     #视频帧宽
     frame_width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     #视频FPS
