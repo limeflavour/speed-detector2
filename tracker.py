@@ -114,6 +114,7 @@ class Tracker(object):
                 # check for cost distance threshold.
                 # If cost is very high then un_assign (delete) the track
                 if cost[i][assignment[i]] > self.dist_thresh:
+                    print('cost[i][assignment[i]] > self.dist_thresh: ',cost[i][assignment[i]],i)
                     assignment[i] = -1
                     un_assigned_tracks.append(i)
                 pass
@@ -130,6 +131,7 @@ class Tracker(object):
                 if id < len(self.tracks):
                     del self.tracks[id]
                     del assignment[id]
+                    print('del self.tracks and assignment',id)
                 else:
                     print("ERROR: id is greater than length of tracks")
 
